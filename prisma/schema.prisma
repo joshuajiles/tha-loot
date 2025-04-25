@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  password  String
+  name      String?
+  projects  Project[]
+  intents   Intent[]
+  ideas     Idea[]
+  resources Resource[]
+  createdAt DateTime   @default(now())
+}
+
+model Project {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  resources   Resource[]
+  ideas       Idea[]
+  createdAt   DateTime   @default(now())
+}
+
+model Intent {
+  id        Int      @id @default(autoincrement())
+  prompt    String // What the user typed or selected
+  type      String // e.g., "Story", "Business Idea", "Character", etc.
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  ideas     Idea[]
+  createdAt DateTime @default(now())
+}
+
+model Idea {
+  id        Int      @id @default(autoincrement())
+  content   String // The actual idea
+  source    String // e.g., "AI", "User", "Prompt"
+  intent    Intent?  @relation(fields: [intentId], references: [id])
+  intentId  Int?
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+}
+
+model Resource {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String
+  type      String // e.g., "video", "image", "article", "music"
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
+  createdAt DateTime @default(now())
+}
